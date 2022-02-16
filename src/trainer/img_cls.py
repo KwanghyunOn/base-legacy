@@ -9,7 +9,7 @@ class ImageClsTrainer(BaseTrainer):
         super().__init__(*args, **kwargs)
         self.loss = nn.CrossEntropyLoss()
 
-    def train_fn(self, epoch):
+    def train_fn(self):
         self.model.train()
         loss_sum = 0.0
         num_data = 0
@@ -31,7 +31,7 @@ class ImageClsTrainer(BaseTrainer):
         return {"loss": loss_sum / num_data}
 
     @torch.no_grad()
-    def eval_fn(self, epoch):
+    def eval_fn(self):
         self.model.eval()
         loss_sum = 0.0
         correct = 0

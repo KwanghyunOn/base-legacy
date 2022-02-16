@@ -1,20 +1,21 @@
 import os
+from abc import ABCMeta, abstractmethod
 
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
 
-class BaseTrainer:
+class BaseTrainer(metaclass=ABCMeta):
     def __init__(
         self,
         model,
         optimizer,
         train_loader,
         eval_loader,
+        exp_path,
         eval_every,
         update_ckpt_every,
         save_ckpt_every,
-        exp_path,
     ):
 
         self.model = model
@@ -40,11 +41,13 @@ class BaseTrainer:
         self.device = torch.device("cuda")
         self.model.to(self.device)
 
-    def train_fn(self, epoch):
-        raise NotImplementedError
+    @abstractmethod
+    def train_fn(self):
+        pass
 
-    def eval_fn(self, epoch):
-        raise NotImplementedError
+    @abstractmethod
+    def eval_fn(self):
+        pass
 
     def log_fn(self, epoch, train_dict, eval_dict):
         for metric_name, metric_value in train_dict.items():
@@ -102,28 +105,21 @@ class BaseTrainer:
     def run(self, epochs, resume=False):
         if resume:
             self.load_checkpoint()
-        elif os.path.isfile(os.path.join(self.ckpt_path, "latest.ckpt")):
-            raise RuntimeError(
-                "Checkpoint already exists. Remove the existing checkpoint or resume training by adding --resume argument"
-            )
 
         for epoch in range(self.current_epoch, epochs):
             print(f"Epoch {epoch}")
 
             # Train
-            train_dict = self.train_fn(epoch)
+            train_dict = self.train_fn()
             self.log_train_metrics(train_dict)
 
             # Eval
             if (epoch + 1) % self.eval_every == 0:
-                eval_dict = self.eval_fn(epoch)
+                eval_dict = self.eval_fn()
                 self.log_eval_metrics(eval_dict)
                 self.eval_epochs.append(epoch)
             else:
                 eval_dict = None
-
-            print("train", train_dict)
-            print("eval", eval_dict)
 
             # Log
             self.log_fn(epoch, train_dict, eval_dict)
