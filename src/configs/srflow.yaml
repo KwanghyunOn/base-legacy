@@ -1,0 +1,51 @@
+
+exp:
+  name: srflow
+  ablation: baseline
+  root: ../experiments/srflow
+
+common:
+  scale: &scale 4
+
+model:
+  name: srflow.SRFlow
+  kwargs:
+    scale: *scale
+    sample_temp: 0.9
+    num_flow_steps: 16
+
+data:
+  transform:
+    name: srflow.SRFlowTransform
+    kwargs:
+      train_size: 40
+      eval_size: 160
+  dataset:
+    name: div2k.DIV2K
+    kwargs:
+      root: ../data/div2k
+      scale: *scale
+      num_eval: 32
+  loader:
+    kwargs:
+      batch_size: 8
+      num_workers: 3
+      eval_kwargs:
+        batch_size: 8
+
+optim:
+  name: Adam
+  kwargs:
+    lr: 1.e-4
+    betas: [0.9, 0.99]
+
+trainer:
+  name: flow.FlowTrainer
+  kwargs:
+    eval_metrics: ['psnr']
+    eval_every: 1
+    update_ckpt_every: 1
+    save_ckpt_every: 100
+
+train:
+  epochs: 200
