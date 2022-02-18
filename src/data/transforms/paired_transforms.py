@@ -14,7 +14,7 @@ class PairedTransform(metaclass=abc.ABCMeta):
 class Compose(PairedTransform):
     def __init__(self, transforms):
         self.transforms = transforms
-    
+
     def __call__(self, img_dict):
         for t in self.transforms:
             if isinstance(t, PairedTransform):
@@ -60,7 +60,7 @@ class RandomHorizontalFlip(torch.nn.Module, PairedTransform):
         return img_dict
 
     def __repr__(self):
-        return self.__class__.__name__ + '(p={})'.format(self.p)
+        return self.__class__.__name__ + "(p={})".format(self.p)
 
 
 class RandomCrop(PairedTransform):
@@ -82,12 +82,12 @@ class RandomCrop(PairedTransform):
             tx = scale * ix
             ty = scale * iy
             tp = scale * self.size
-            img_dict[k] = img[ty:ty + tp, tx:tx + tp]
-        
+            img_dict[k] = img[ty : ty + tp, tx : tx + tp]
+
         return img_dict
 
     def __repr__(self):
-        return self.__class__.__name__ + '(size={})'.format(self.size)
+        return self.__class__.__name__ + "(size={})".format(self.size)
 
 
 class CentorCrop(PairedTransform):
@@ -109,12 +109,12 @@ class CentorCrop(PairedTransform):
             tx = scale * ix
             ty = scale * iy
             tp = scale * self.size
-            img_dict[k] = img[ty:ty + tp, tx:tx + tp]
-        
+            img_dict[k] = img[ty : ty + tp, tx : tx + tp]
+
         return img_dict
 
     def __repr__(self):
-        return self.__class__.__name__ + '(size={})'.format(self.size)
+        return self.__class__.__name__ + "(size={})".format(self.size)
 
 
 class ModCrop(PairedTransform):
@@ -139,9 +139,9 @@ class ModCrop(PairedTransform):
             ty = scale * iy
             tpx = scale * size_w
             tpy = scale * size_h
-            img_dict[k] = img[ty:ty + tpy, tx:tx + tpx]
-        
+            img_dict[k] = img[ty : ty + tpy, tx : tx + tpx]
+
         return img_dict
 
     def __repr__(self):
-        return self.__class__.__name__ + '(modulo={})'.format(self.m)
+        return self.__class__.__name__ + "(modulo={})".format(self.m)

@@ -87,7 +87,9 @@ class BaseTrainer(metaclass=ABCMeta):
             )
 
     def load_checkpoint(self):
-        ckpt = torch.load(os.path.join(self.ckpt_path, "latest.ckpt"), map_location='cpu')
+        ckpt = torch.load(
+            os.path.join(self.ckpt_path, "latest.ckpt"), map_location="cpu"
+        )
         self.start_epoch = ckpt["epoch"] + 1
         self.model_module.load_state_dict(ckpt["model"])
         self.optimizer.load_state_dict(ckpt["optimizer"])
