@@ -5,10 +5,9 @@ from survae.data import DATA_PATH
 
 class UnsupervisedCIFAR10(CIFAR10):
     def __init__(self, root=DATA_PATH, train=True, transform=None, download=False):
-        super(UnsupervisedCIFAR10, self).__init__(root,
-                                                  train=train,
-                                                  transform=transform,
-                                                  download=download)
+        super(UnsupervisedCIFAR10, self).__init__(
+            root, train=train, transform=transform, download=download
+        )
 
     def __getitem__(self, index):
         """

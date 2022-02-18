@@ -1,7 +1,7 @@
-'''
+"""
 Contains datasets used in MAF paper.
 See https://github.com/gpapamak/maf.
-'''
+"""
 
 import os
 import h5py
@@ -16,14 +16,14 @@ from survae.data import DATA_PATH
 
 class UCI_MAF_Dataset(torch.utils.data.Dataset):
 
-    url = 'https://zenodo.org/record/1161203/files/data.tar.gz?download=1'
-    folder = 'uci_maf'
-    download_file = 'data.tar.gz'
+    url = "https://zenodo.org/record/1161203/files/data.tar.gz?download=1"
+    folder = "uci_maf"
+    download_file = "data.tar.gz"
     raw_folder = None
     raw_file = None
 
-    def __init__(self, root=DATA_PATH, split='train', download=False):
-        assert split in {'train', 'validation', 'test'}
+    def __init__(self, root=DATA_PATH, split="train", download=False):
+        assert split in {"train", "validation", "test"}
         self.root = os.path.expanduser(root)
         self.split = split
 
@@ -31,8 +31,9 @@ class UCI_MAF_Dataset(torch.utils.data.Dataset):
             if download:
                 self.download()
             else:
-                raise RuntimeError('Dataset not found.' +
-                                   ' You can use download=True to download it')
+                raise RuntimeError(
+                    "Dataset not found." + " You can use download=True to download it"
+                )
 
         if not self._check_raw():
             self.extract()
@@ -66,7 +67,7 @@ class UCI_MAF_Dataset(torch.utils.data.Dataset):
         if not os.path.exists(os.path.join(self.root, self.folder)):
             os.makedirs(os.path.join(self.root, self.folder))
 
-        print('Downloading', self.download_file)
+        print("Downloading", self.download_file)
         urllib.request.urlretrieve(self.url, self.download_data_path)
 
     def extract(self):
@@ -82,19 +83,19 @@ class UCI_MAF_Dataset(torch.utils.data.Dataset):
 
 class BSDS300Dataset(UCI_MAF_Dataset):
 
-    raw_folder = 'uci_maf/data/BSDS300'
-    raw_file = 'BSDS300.hdf5'
+    raw_folder = "uci_maf/data/BSDS300"
+    raw_file = "BSDS300.hdf5"
 
     def load_data(self, split):
         # Taken from https://github.com/bayesiains/nsf/blob/master/data/bsds300.py
-        file = h5py.File(self.raw_data_path, 'r')
+        file = h5py.File(self.raw_data_path, "r")
         return np.array(file[split]).astype(np.float32)
 
 
 class GasDataset(UCI_MAF_Dataset):
 
-    raw_folder = 'uci_maf/data/gas'
-    raw_file = 'ethylene_CO.pickle'
+    raw_folder = "uci_maf/data/gas"
+    raw_file = "ethylene_CO.pickle"
 
     def load_data(self, split):
         # Taken from https://github.com/bayesiains/nsf/blob/master/data/gas.py
@@ -136,29 +137,33 @@ class GasDataset(UCI_MAF_Dataset):
 
             return data_train, data_validate, data_test
 
-        data_train, data_validate, data_test = load_data_and_clean_and_split(self.raw_data_path)
+        data_train, data_validate, data_test = load_data_and_clean_and_split(
+            self.raw_data_path
+        )
 
-        if split == 'train':
+        if split == "train":
             return np.array(data_train).astype(np.float32)
-        if split == 'validation':
+        if split == "validation":
             return np.array(data_validate).astype(np.float32)
-        if split == 'test':
+        if split == "test":
             return np.array(data_test).astype(np.float32)
 
 
 class HEPMASSDataset(UCI_MAF_Dataset):
 
-    raw_folder = 'uci_maf/data/hepmass'
-    raw_file = '1000_train.csv' # ['1000_train.csv', '1000_test.csv']
+    raw_folder = "uci_maf/data/hepmass"
+    raw_file = "1000_train.csv"  # ['1000_train.csv', '1000_test.csv']
 
     def load_data(self, split):
         # Taken from https://github.com/bayesiains/nsf/blob/master/data/hepmass.py
         def load_data(path):
 
-            data_train = pd.read_csv(filepath_or_buffer=os.path.join(path, '1000_train.csv'),
-                                     index_col=False)
-            data_test = pd.read_csv(filepath_or_buffer=os.path.join(path, '1000_test.csv'),
-                                    index_col=False)
+            data_train = pd.read_csv(
+                filepath_or_buffer=os.path.join(path, "1000_train.csv"), index_col=False
+            )
+            data_test = pd.read_csv(
+                filepath_or_buffer=os.path.join(path, "1000_test.csv"), index_col=False
+            )
 
             return data_train, data_test
 
@@ -200,10 +205,26 @@ class HEPMASSDataset(UCI_MAF_Dataset):
                 if max_count > 5:
                     features_to_remove.append(i)
                 i += 1
-            data_train = data_train[:, np.array(
-                [i for i in range(data_train.shape[1]) if i not in features_to_remove])]
-            data_test = data_test[:, np.array(
-                [i for i in range(data_test.shape[1]) if i not in features_to_remove])]
+            data_train = data_train[
+                :,
+                np.array(
+                    [
+                        i
+                        for i in range(data_train.shape[1])
+                        if i not in features_to_remove
+                    ]
+                ),
+            ]
+            data_test = data_test[
+                :,
+                np.array(
+                    [
+                        i
+                        for i in range(data_test.shape[1])
+                        if i not in features_to_remove
+                    ]
+                ),
+            ]
 
             N = data_train.shape[0]
             N_validate = int(N * 0.1)
@@ -212,20 +233,26 @@ class HEPMASSDataset(UCI_MAF_Dataset):
 
             return data_train, data_validate, data_test
 
-        data_train, data_validate, data_test = load_data_no_discrete_normalised_as_array(os.path.join(self.root, self.raw_folder))
+        (
+            data_train,
+            data_validate,
+            data_test,
+        ) = load_data_no_discrete_normalised_as_array(
+            os.path.join(self.root, self.raw_folder)
+        )
 
-        if split == 'train':
+        if split == "train":
             return np.array(data_train).astype(np.float32)
-        if split == 'validation':
+        if split == "validation":
             return np.array(data_validate).astype(np.float32)
-        if split == 'test':
+        if split == "test":
             return np.array(data_test).astype(np.float32)
 
 
 class MiniBooNEDataset(UCI_MAF_Dataset):
 
-    raw_folder = 'uci_maf/data/miniboone'
-    raw_file = 'data.npy'
+    raw_folder = "uci_maf/data/miniboone"
+    raw_file = "data.npy"
 
     def load_data(self, split):
         # Taken from https://github.com/bayesiains/nsf/blob/master/data/miniboone.py
@@ -273,18 +300,18 @@ class MiniBooNEDataset(UCI_MAF_Dataset):
 
         data_train, data_validate, data_test = load_data_normalised(self.raw_data_path)
 
-        if split == 'train':
+        if split == "train":
             return np.array(data_train).astype(np.float32)
-        if split == 'validation':
+        if split == "validation":
             return np.array(data_validate).astype(np.float32)
-        if split == 'test':
+        if split == "test":
             return np.array(data_test).astype(np.float32)
 
 
 class PowerDataset(UCI_MAF_Dataset):
 
-    raw_folder = 'uci_maf/data/power'
-    raw_file = 'data.npy'
+    raw_folder = "uci_maf/data/power"
+    raw_file = "data.npy"
 
     def load_data(self, split):
         # Taken from https://github.com/bayesiains/nsf/blob/master/data/power.py
@@ -337,9 +364,9 @@ class PowerDataset(UCI_MAF_Dataset):
 
         data_train, data_validate, data_test = load_data_normalised()
 
-        if split == 'train':
+        if split == "train":
             return np.array(data_train).astype(np.float32)
-        if split == 'validation':
+        if split == "validation":
             return np.array(data_validate).astype(np.float32)
-        if split == 'test':
+        if split == "test":
             return np.array(data_test).astype(np.float32)

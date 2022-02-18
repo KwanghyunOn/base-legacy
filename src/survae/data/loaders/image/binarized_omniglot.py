@@ -19,7 +19,8 @@ class DynamicallyBinarizedOMNIGLOT(TrainTestLoader):
 
         # Define transformations
         trans = [DynamicBinarize()]
-        if flatten: trans.append(flatten_transform)
+        if flatten:
+            trans.append(flatten_transform)
 
         # Load data
         self.train = OMNIGLOTDataset(root, train=True, transform=Compose(trans))

@@ -27,15 +27,18 @@ class DIV2K(ImageDataset):
                 x3/
                 x4/
     """
-    def __init__(self, root, scale, transform=None, is_binary=True, train=True, num_eval=None):
+
+    def __init__(
+        self, root, scale, transform=None, is_binary=True, train=True, num_eval=None
+    ):
         self.num_eval = num_eval
-        split = 'train' if train else 'valid'
-        deg = 'bicubic'
-        hr_data_dir = os.path.join(root, f'DIV2K_{split}_HR')
-        lr_data_dir = os.path.join(root, f'DIV2K_{split}_LR_{deg}', f'X{scale}')
-        data_dirs = {'hr': hr_data_dir, 'lr': lr_data_dir}
+        split = "train" if train else "valid"
+        deg = "bicubic"
+        hr_data_dir = os.path.join(root, f"DIV2K_{split}_HR")
+        lr_data_dir = os.path.join(root, f"DIV2K_{split}_LR_{deg}", f"X{scale}")
+        data_dirs = {"hr": hr_data_dir, "lr": lr_data_dir}
         super().__init__(data_dirs, transform, is_binary, train)
-    
+
     def __len__(self):
         if not self.train and self.num_eval is not None:
             return self.num_eval

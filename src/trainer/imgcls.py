@@ -11,7 +11,7 @@ class ImageClsTrainer(BaseTrainer):
 
     def train_fn(self):
         self.model.train()
-        loss_sum = torch.tensor(0., device=self.device)
+        loss_sum = torch.tensor(0.0, device=self.device)
         num_data = 0
         for data in self.train_loader:
             imgs, labels = data["img"], data["label"]
@@ -32,7 +32,7 @@ class ImageClsTrainer(BaseTrainer):
     @torch.no_grad()
     def eval_fn(self):
         self.model.eval()
-        loss_sum = torch.tensor(0., device=self.device)
+        loss_sum = torch.tensor(0.0, device=self.device)
         correct = torch.tensor(0, device=self.device)
         num_data = 0
         for data in self.eval_loader:

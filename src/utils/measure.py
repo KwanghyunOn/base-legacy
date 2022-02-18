@@ -4,9 +4,7 @@ from .metric import PSNR, SSIM, LPIPS
 
 
 class Measure:
-    def __init__(
-        self, metrics, net_lpips="alex", device="cpu", dtype=torch.float32
-    ):
+    def __init__(self, metrics, net_lpips="alex", device="cpu", dtype=torch.float32):
         self.metrics = metrics
         if "psnr" in self.metrics:
             self.psnr = PSNR()

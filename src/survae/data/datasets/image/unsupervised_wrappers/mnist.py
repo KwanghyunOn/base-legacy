@@ -6,10 +6,9 @@ from survae.data import DATA_PATH
 
 class UnsupervisedMNIST(MNIST):
     def __init__(self, root=DATA_PATH, train=True, transform=None, download=False):
-        super(UnsupervisedMNIST, self).__init__(root,
-                                                train=train,
-                                                transform=transform,
-                                                download=download)
+        super(UnsupervisedMNIST, self).__init__(
+            root, train=train, transform=transform, download=download
+        )
 
     def __getitem__(self, index):
         """
@@ -24,9 +23,9 @@ class UnsupervisedMNIST(MNIST):
     @property
     def raw_folder(self):
         # Replace self.__class__.__name__ by 'MNIST'
-        return os.path.join(self.root, 'MNIST', 'raw')
+        return os.path.join(self.root, "MNIST", "raw")
 
     @property
     def processed_folder(self):
         # Replace self.__class__.__name__ by 'MNIST'
-        return os.path.join(self.root, 'MNIST', 'processed')
+        return os.path.join(self.root, "MNIST", "processed")

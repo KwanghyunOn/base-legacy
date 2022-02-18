@@ -6,10 +6,9 @@ from survae.data import DATA_PATH
 
 class UnsupervisedFashionMNIST(FashionMNIST):
     def __init__(self, root=DATA_PATH, train=True, transform=None, download=False):
-        super(UnsupervisedFashionMNIST, self).__init__(root,
-                                                       train=train,
-                                                       transform=transform,
-                                                       download=download)
+        super(UnsupervisedFashionMNIST, self).__init__(
+            root, train=train, transform=transform, download=download
+        )
 
     def __getitem__(self, index):
         """
@@ -24,9 +23,9 @@ class UnsupervisedFashionMNIST(FashionMNIST):
     @property
     def raw_folder(self):
         # Replace self.__class__.__name__ by 'FashionMNIST'
-        return os.path.join(self.root, 'FashionMNIST', 'raw')
+        return os.path.join(self.root, "FashionMNIST", "raw")
 
     @property
     def processed_folder(self):
         # Replace self.__class__.__name__ by 'FashionMNIST'
-        return os.path.join(self.root, 'FashionMNIST', 'processed')
+        return os.path.join(self.root, "FashionMNIST", "processed")

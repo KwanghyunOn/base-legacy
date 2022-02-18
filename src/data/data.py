@@ -17,7 +17,9 @@ def get_dataset(dataset_name, **dataset_kwargs):
     return dataset_cls(**dataset_kwargs)
 
 
-def get_dataloader(transform_name, transform_kwargs, dataset_name, dataset_kwargs, loader_kwargs):
+def get_dataloader(
+    transform_name, transform_kwargs, dataset_name, dataset_kwargs, loader_kwargs
+):
     if "eval_kwargs" in loader_kwargs:
         eval_kwargs = loader_kwargs.pop("eval_kwargs")
         loader_eval_kwargs = loader_kwargs.copy()
@@ -32,14 +34,20 @@ def get_dataloader(transform_name, transform_kwargs, dataset_name, dataset_kwarg
         transform_train = None
         transform_eval = None
 
-    dataset_train = get_dataset(dataset_name, **dataset_kwargs, transform=transform_train, train=True)
-    dataset_eval = get_dataset(dataset_name, **dataset_kwargs, transform=transform_eval, train=False)
+    dataset_train = get_dataset(
+        dataset_name, **dataset_kwargs, transform=transform_train, train=True
+    )
+    dataset_eval = get_dataset(
+        dataset_name, **dataset_kwargs, transform=transform_eval, train=False
+    )
     loader_train = DataLoader(dataset_train, **loader_kwargs, shuffle=True)
     loader_eval = DataLoader(dataset_eval, **loader_eval_kwargs, shuffle=False)
     return loader_train, loader_eval
 
 
-def get_dataloader_ddp(transform_name, transform_kwargs, dataset_name, dataset_kwargs, loader_kwargs):
+def get_dataloader_ddp(
+    transform_name, transform_kwargs, dataset_name, dataset_kwargs, loader_kwargs
+):
     if "eval_kwargs" in loader_kwargs:
         eval_kwargs = loader_kwargs.pop("eval_kwargs")
         loader_eval_kwargs = loader_kwargs.copy()
@@ -54,10 +62,18 @@ def get_dataloader_ddp(transform_name, transform_kwargs, dataset_name, dataset_k
         transform_train = None
         transform_eval = None
 
-    dataset_train = get_dataset(dataset_name, **dataset_kwargs, transform=transform_train, train=True)
-    dataset_eval = get_dataset(dataset_name, **dataset_kwargs, transform=transform_eval, train=False)
+    dataset_train = get_dataset(
+        dataset_name, **dataset_kwargs, transform=transform_train, train=True
+    )
+    dataset_eval = get_dataset(
+        dataset_name, **dataset_kwargs, transform=transform_eval, train=False
+    )
     sampler_train = DistributedSampler(dataset_train, shuffle=True)
     sampler_eval = DistributedSampler(dataset_eval, shuffle=False)
-    loader_train = DataLoader(dataset_train, **loader_kwargs, sampler=sampler_train, pin_memory=True)
-    loader_eval = DataLoader(dataset_eval, **loader_eval_kwargs, sampler=sampler_eval, pin_memory=True)
+    loader_train = DataLoader(
+        dataset_train, **loader_kwargs, sampler=sampler_train, pin_memory=True
+    )
+    loader_eval = DataLoader(
+        dataset_eval, **loader_eval_kwargs, sampler=sampler_eval, pin_memory=True
+    )
     return loader_train, loader_eval

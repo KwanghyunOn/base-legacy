@@ -18,10 +18,14 @@ class Config:
         self.model_kwargs = self._get_value("model", "kwargs", default=dict())
 
         self.transform_name = self._get_value("data", "transform", "name")
-        self.transform_kwargs = self._get_value("data", "transform", "kwargs", default=dict())
+        self.transform_kwargs = self._get_value(
+            "data", "transform", "kwargs", default=dict()
+        )
 
         self.dataset_name = self._get_value("data", "dataset", "name", required=True)
-        self.dataset_kwargs = self._get_value("data", "dataset", "kwargs", default=dict())
+        self.dataset_kwargs = self._get_value(
+            "data", "dataset", "kwargs", default=dict()
+        )
         self.loader_kwargs = self._get_value("data", "loader", "kwargs", default=dict())
 
         self.optim_name = self._get_value("optim", "name", required=True)

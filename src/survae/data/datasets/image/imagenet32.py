@@ -17,13 +17,13 @@ class ImageNet32Dataset(data.Dataset):
     """
 
     urls = [
-        'http://image-net.org/small/train_32x32.tar',
-        'http://image-net.org/small/valid_32x32.tar'
+        "http://image-net.org/small/train_32x32.tar",
+        "http://image-net.org/small/valid_32x32.tar",
     ]
-    raw_folder = 'imagenet32/raw'
-    processed_folder = 'imagenet32/processed'
-    train_folder = 'train_32x32'
-    valid_folder = 'valid_32x32'
+    raw_folder = "imagenet32/raw"
+    processed_folder = "imagenet32/processed"
+    train_folder = "train_32x32"
+    valid_folder = "valid_32x32"
 
     def __init__(self, root=DATA_PATH, train=True, transform=None, download=False):
         self.root = os.path.expanduser(root)
@@ -34,16 +34,23 @@ class ImageNet32Dataset(data.Dataset):
             if download:
                 self.download()
             else:
-                raise RuntimeError('Dataset not found.' +
-                                   ' You can use download=True to download it')
+                raise RuntimeError(
+                    "Dataset not found." + " You can use download=True to download it"
+                )
 
         if not self._check_processed():
             self.process()
 
         if self.train:
-            self.files = [os.path.join(self.processed_train_folder, file) for file in os.listdir(self.processed_train_folder)]
+            self.files = [
+                os.path.join(self.processed_train_folder, file)
+                for file in os.listdir(self.processed_train_folder)
+            ]
         else:
-            self.files = [os.path.join(self.processed_valid_folder, file) for file in os.listdir(self.processed_valid_folder)]
+            self.files = [
+                os.path.join(self.processed_valid_folder, file)
+                for file in os.listdir(self.processed_valid_folder)
+            ]
 
     def __getitem__(self, index):
         """
@@ -65,7 +72,10 @@ class ImageNet32Dataset(data.Dataset):
 
     @property
     def raw_file_paths(self):
-        return [os.path.join(self.root, self.raw_folder, url.rpartition('/')[2]) for url in self.urls]
+        return [
+            os.path.join(self.root, self.raw_folder, url.rpartition("/")[2])
+            for url in self.urls
+        ]
 
     @property
     def processed_data_folder(self):
@@ -80,10 +90,14 @@ class ImageNet32Dataset(data.Dataset):
         return os.path.join(self.processed_data_folder, self.valid_folder)
 
     def _check_processed(self):
-        return os.path.exists(self.processed_train_folder) and os.path.exists(self.processed_valid_folder)
+        return os.path.exists(self.processed_train_folder) and os.path.exists(
+            self.processed_valid_folder
+        )
 
     def _check_raw(self):
-        return os.path.exists(self.raw_file_paths[0]) and os.path.exists(self.raw_file_paths[1])
+        return os.path.exists(self.raw_file_paths[0]) and os.path.exists(
+            self.raw_file_paths[1]
+        )
 
     def download(self):
         """Download the data if it doesn't exist in processed_folder already."""
@@ -103,7 +117,7 @@ class ImageNet32Dataset(data.Dataset):
                 raise
 
         for url, file_path in zip(self.urls, self.raw_file_paths):
-            print('Downloading ' + url)
+            print("Downloading " + url)
             urllib.request.urlretrieve(url, file_path)
 
     def process(self):

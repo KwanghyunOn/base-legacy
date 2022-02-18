@@ -8,9 +8,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--world_size", type=int, default=torch.cuda.device_count())
 args, unknown = parser.parse_known_args()
 
-args_launch = ["python", "-m", "torch.distributed.launch",
-               "--nproc_per_node", str(args.world_size),
-               "train.py", *unknown]
+args_launch = [
+    "python",
+    "-m",
+    "torch.distributed.launch",
+    "--nproc_per_node",
+    str(args.world_size),
+    "train.py",
+    *unknown,
+]
 p = subprocess.Popen(args_launch, stdout=sys.stdout, stderr=sys.stderr)
 
 try:

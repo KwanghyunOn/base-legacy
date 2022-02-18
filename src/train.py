@@ -46,10 +46,15 @@ def train(cfg):
 
 def train_ddp(cfg, local_rank):
     torch.cuda.set_device(local_rank)
-    torch.distributed.init_process_group(backend='nccl', init_method='env://')
-    
+    torch.distributed.init_process_group(backend="nccl", init_method="env://")
+
     model = get_model(cfg.model_name, cfg.model_kwargs).cuda()
-    model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=True)
+    model = torch.nn.parallel.DistributedDataParallel(
+        model,
+        device_ids=[local_rank],
+        output_device=local_rank,
+        find_unused_parameters=True,
+    )
     loader_train, loader_eval = get_dataloader_ddp(
         cfg.transform_name,
         cfg.transform_kwargs,

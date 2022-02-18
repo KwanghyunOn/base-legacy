@@ -1,5 +1,3 @@
-
-
 def dl2ld(dl):
     """
     Convert a dictionary of lists to a list of dictonaries

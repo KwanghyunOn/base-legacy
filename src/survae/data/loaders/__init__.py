@@ -1,1 +1,6 @@
-from .task_loaders import PresplitLoader, TrainTestLoader, TrainValidTestLoader, RandomSplitLoader
+from .task_loaders import (
+    PresplitLoader,
+    TrainTestLoader,
+    TrainValidTestLoader,
+    RandomSplitLoader,
+)

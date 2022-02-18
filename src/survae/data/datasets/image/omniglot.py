@@ -13,20 +13,26 @@ class OMNIGLOTDataset(data.Dataset):
     as processed in
     (Burda et al., 2015): https://arxiv.org/abs/1509.00519
     """
-    url = 'https://github.com/yburda/iwae/blob/master/datasets/OMNIGLOT/chardata.mat'
-    file = 'chardata.mat'
+
+    url = "https://github.com/yburda/iwae/blob/master/datasets/OMNIGLOT/chardata.mat"
+    file = "chardata.mat"
 
     def __init__(self, root=DATA_PATH, train=True, transform=None):
-        self.root = os.path.join(os.path.expanduser(root), 'omniglot')
+        self.root = os.path.join(os.path.expanduser(root), "omniglot")
         self.train = train
         self.transform = transform
 
         if not self._check_exists():
-            raise RuntimeError('Dataset not found.' + ' You can download it from https://github.com/yburda/iwae/tree/master/datasets/OMNIGLOT')
+            raise RuntimeError(
+                "Dataset not found."
+                + " You can download it from https://github.com/yburda/iwae/tree/master/datasets/OMNIGLOT"
+            )
 
         train_x, test_x = self._load_data()
-        if train: data = train_x
-        else: data = test_x
+        if train:
+            data = train_x
+        else:
+            data = test_x
 
         c, w, h = 1, 28, 28
         self.data = torch.tensor(data, dtype=torch.float).view(-1, c, h, w)
@@ -50,9 +56,9 @@ class OMNIGLOTDataset(data.Dataset):
         if not os.path.exists(self.root):
             os.makedirs(self.root)
 
-        print('Downloading Omniglot...')
+        print("Downloading Omniglot...")
         urllib.request.urlretrieve(self.url, self.local_file)
-        print('Done!')
+        print("Done!")
 
     def _check_exists(self):
         return os.path.exists(self.local_file)
@@ -60,7 +66,7 @@ class OMNIGLOTDataset(data.Dataset):
     def _load_data(self):
         data = loadmat(self.local_file)
 
-        train_x = data['data'].astype('float32').T
-        test_x = data['testdata'].astype('float32').T
+        train_x = data["data"].astype("float32").T
+        test_x = data["testdata"].astype("float32").T
 
         return train_x, test_x
