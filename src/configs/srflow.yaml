@@ -29,9 +29,9 @@ data:
   loader:
     kwargs:
       batch_size: 8
-      num_workers: 3
-      eval_kwargs:
-        batch_size: 8
+      num_workers: 4
+      # eval_kwargs:
+      #   batch_size: 8
 
 optim:
   name: Adam
@@ -45,7 +45,7 @@ trainer:
     eval_metrics: ['psnr']
     eval_every: 1
     update_ckpt_every: 1
-    save_ckpt_every: 100
+    save_ckpt_every: 10
 
 train:
   epochs: 200

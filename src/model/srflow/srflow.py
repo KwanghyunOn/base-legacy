@@ -183,6 +183,12 @@ class SRFlow(Distribution):
 
     def loglik_bpd(self, hr, lr):
         return -self.log_prob(hr, lr).sum() / (math.log(2) * hr.shape.numel())
+    
+    def forward(self, hr=None, lr=None, sample=False):
+        if sample:
+            return self.sample(lr)
+        else:
+            return self.loglik_bpd(hr, lr)
 
 
 class SimpleSRFlowLevel(SRFlowLevel):
@@ -277,3 +283,9 @@ class SimpleSRFlow(Distribution):
 
     def loglik_bpd(self, hr, lr):
         return -self.log_prob(hr, lr).sum() / (math.log(2) * hr.shape.numel())
+
+    def forward(self, hr=None, lr=None, sample=False):
+        if sample:
+            return self.sample(lr)
+        else:
+            return self.loglik_bpd(hr, lr)

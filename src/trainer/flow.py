@@ -7,7 +7,7 @@ from utils import Measure
 class FlowTrainer(BaseTrainer):
     def __init__(self, eval_metrics=["psnr"], **kwargs):
         super().__init__(**kwargs)
-        self.measure = Measure(eval_metrics)
+        self.measure = Measure(eval_metrics, device=self.device)
 
     def train_fn(self):
         self.model.train()
@@ -17,13 +17,13 @@ class FlowTrainer(BaseTrainer):
             hr, lr = data["hr"], data["lr"]
             hr = hr.to(self.device)
             lr = lr.to(self.device)
-            loss = self.model.loglik_bpd(hr, lr)
+            loss = self.model(hr=hr, lr=lr, sample=False)
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
-            loss_sum += loss.detach().cpu().item() * len(hr)
+            loss_sum += loss.detach() * len(hr)
             num_iter += len(hr)
             bpd = loss_sum / num_iter
         return {"bpd": bpd}
@@ -39,11 +39,11 @@ class FlowTrainer(BaseTrainer):
                 batch_size = len(hr)
                 hr = hr.to(self.device)
                 lr = lr.to(self.device)
-                loss = self.model.loglik_bpd(hr, lr)
-                eval_dict["bpd"] += loss.detach().cpu().item() * batch_size
+                loss = self.model(hr, lr)
+                eval_dict["bpd"] += loss.detach() * batch_size
                 num_iter += batch_size
 
-                hr_sample = self.model.sample(lr)
+                hr_sample = self.model(lr=lr, sample=True)
                 eval_result = self.measure(hr, hr_sample, data_range=2.0)
                 for k, v in eval_result.items():
                     if k in eval_dict:

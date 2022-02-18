@@ -37,10 +37,10 @@ class PSNR(nn.Module):
 
 
 class SSIM(nn.Module):
-    def __init__(self, device_type="cpu", dtype=torch.float32):
+    def __init__(self, device="cpu", dtype=torch.float32):
         super(SSIM, self).__init__()
 
-        self.device_type = device_type
+        self.device = device
         self.dtype = dtype  # SSIM in half precision could be inaccurate
 
         def _get_ssim_weight():
@@ -67,7 +67,7 @@ class SSIM(nn.Module):
             return weight
 
         self.weight = _get_ssim_weight().to(
-            self.device_type, dtype=self.dtype, non_blocking=True
+            self.device, dtype=self.dtype, non_blocking=True
         )
 
     def forward(self, im1, im2, data_range=None):
@@ -75,8 +75,8 @@ class SSIM(nn.Module):
         Default arguments set to multichannel=True, gaussian_weight=True, use_sample_covariance=False
         """
 
-        im1 = im1.to(self.device_type, dtype=self.dtype, non_blocking=True)
-        im2 = im2.to(self.device_type, dtype=self.dtype, non_blocking=True)
+        im1 = im1.to(self.device, dtype=self.dtype, non_blocking=True)
+        im2 = im2.to(self.device, dtype=self.dtype, non_blocking=True)
 
         K1 = 0.01
         K2 = 0.03
@@ -136,17 +136,17 @@ class SSIM(nn.Module):
 
 
 class LPIPS(nn.Module):
-    def __init__(self, net="vgg", device_type="cpu", dtype=torch.float32):
+    def __init__(self, net="vgg", device="cpu", dtype=torch.float32):
         super().__init__()
-        self.device_type = device_type
+        self.device = device
         self.dtype = dtype
         self.model = lpips.LPIPS(net=net)
-        self.model.to(self.device_type)
+        self.model.to(self.device)
         self.model.eval()
 
     def forward(self, im1, im2):
-        im1 = im1.to(self.device_type, dtype=self.dtype)
-        im2 = im2.to(self.device_type, dtype=self.dtype)
+        im1 = im1.to(self.device, dtype=self.dtype)
+        im2 = im2.to(self.device, dtype=self.dtype)
         im1 = _expand(im1)
         im2 = _expand(im2)
         mlpips = self.model(im1, im2).mean()
