@@ -1,7 +1,7 @@
 
 exp:
   name: resnet18
-  ablation: lr5e-4
+  ablation: baseline
   root: ../experiments/cifar10
 
 model:
@@ -12,14 +12,17 @@ model:
     num_classes: 10
 
 data:
+  transform:
+    name: imgcls.ImgClsTransform
+
   dataset:
     name: cifar10.CIFAR10
     kwargs:
       root: ../data/cifar10 
   loader:
     kwargs:
-      batch_size: 4096
-      num_workers: 3
+      batch_size: 256
+      num_workers: 4
 
 optim:
   name: Adam
@@ -28,11 +31,11 @@ optim:
     betas: [0.9, 0.99]
 
 trainer:
-  name: img_cls.ImageClsTrainer
+  name: imgcls.ImageClsTrainer
   kwargs:
     eval_every: 1
     update_ckpt_every: 1
     save_ckpt_every: 10
 
 train:
-  epochs: 100
+  epochs: 20
