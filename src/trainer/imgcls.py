@@ -11,7 +11,7 @@ class ImageClsTrainer(BaseTrainer):
 
     def train_fn(self):
         self.model.train()
-        loss_sum = 0.0
+        loss_sum = torch.tensor(0., device=self.device)
         num_data = 0
         for data in self.train_loader:
             imgs, labels = data["img"], data["label"]
@@ -24,17 +24,16 @@ class ImageClsTrainer(BaseTrainer):
             loss.backward()
             self.optimizer.step()
 
-            loss_sum += loss.detach().cpu().item() * len(imgs)
+            loss_sum += loss.detach() * len(imgs)
             num_data += len(imgs)
-            print(f"Loss: {loss_sum / num_data:.3f}", end="\r")
 
         return {"loss": loss_sum / num_data}
 
     @torch.no_grad()
     def eval_fn(self):
         self.model.eval()
-        loss_sum = 0.0
-        correct = 0
+        loss_sum = torch.tensor(0., device=self.device)
+        correct = torch.tensor(0, device=self.device)
         num_data = 0
         for data in self.eval_loader:
             imgs, labels = data["img"], data["label"]
@@ -44,8 +43,8 @@ class ImageClsTrainer(BaseTrainer):
             loss = self.loss(logits, labels)
             predicted = torch.argmax(logits, dim=1)
 
-            correct += (predicted == labels).sum().item()
-            loss_sum += loss.detach().cpu().item() * len(imgs)
+            correct += (predicted == labels).sum()
+            loss_sum += loss.detach() * len(imgs)
             num_data += len(imgs)
 
         return {"accuracy": correct / num_data, "loss": loss_sum / num_data}
