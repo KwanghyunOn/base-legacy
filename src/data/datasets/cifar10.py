@@ -43,9 +43,8 @@ class CIFAR10(Dataset):
             self.labels.extend(data_dict[b"labels"])
 
         self.imgs = (
-            np.stack(self.imgs, axis=0).reshape(-1, 3, 32, 32).astype(np.float32)
+            np.stack(self.imgs, axis=0).reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
         )
-        self.imgs = (self.imgs / 255.0) * 2.0 - 1.0
 
         meta_dict = unpickle(os.path.join(root, f"batches.meta"))
         self.class_names = [
