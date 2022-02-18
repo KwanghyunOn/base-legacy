@@ -4,6 +4,8 @@ from abc import ABCMeta, abstractmethod
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
+from utils import ddp
+
 
 class BaseTrainer(metaclass=ABCMeta):
     def __init__(
@@ -16,18 +18,13 @@ class BaseTrainer(metaclass=ABCMeta):
         eval_every,
         update_ckpt_every,
         save_ckpt_every,
+        ddp=False,
     ):
 
         self.model = model
         self.optimizer = optimizer
         self.train_loader = train_loader
         self.eval_loader = eval_loader
-
-        self.current_epoch = 0
-        self.train_metrics = {}
-        self.eval_metrics = {}
-        self.eval_epochs = []
-
         self.eval_every = eval_every
         self.update_ckpt_every = update_ckpt_every
         self.save_ckpt_every = save_ckpt_every
@@ -35,18 +32,33 @@ class BaseTrainer(metaclass=ABCMeta):
         self.exp_path = exp_path
         self.ckpt_path = os.path.join(self.exp_path, "ckpts")
         os.makedirs(self.ckpt_path, exist_ok=True)
-
         self.writer = SummaryWriter(os.path.join(self.exp_path, "tb"))
+        self.start_epoch = 0
 
         self.device = torch.device("cuda")
         self.model.to(self.device)
+        self.ddp = ddp
+
+        # For saving and loading state_dict
+        if self.ddp:
+            self.model_module = self.model.module
+        else:
+            self.model_module = self.model
 
     @abstractmethod
     def train_fn(self):
+        """
+        Return:
+            Dictionary of training results. Every value in the dictionary must be a single-element tensor.
+        """
         pass
 
     @abstractmethod
     def eval_fn(self):
+        """
+        Return:
+            Dictionary of eval results. Every value in the dictionary must be a single-element tensor.
+        """
         pass
 
     def log_fn(self, epoch, train_dict, eval_dict):
@@ -60,70 +72,50 @@ class BaseTrainer(metaclass=ABCMeta):
                     f"eval/{metric_name}", metric_value, global_step=epoch + 1
                 )
 
-    def log_train_metrics(self, train_dict):
-        if len(self.train_metrics) == 0:
-            for metric_name, metric_value in train_dict.items():
-                self.train_metrics[metric_name] = [metric_value]
-        else:
-            for metric_name, metric_value in train_dict.items():
-                self.train_metrics[metric_name].append(metric_value)
-
-    def log_eval_metrics(self, eval_dict):
-        if len(self.eval_metrics) == 0:
-            for metric_name, metric_value in eval_dict.items():
-                self.eval_metrics[metric_name] = [metric_value]
-        else:
-            for metric_name, metric_value in eval_dict.items():
-                self.eval_metrics[metric_name].append(metric_value)
-
-    def save_checkpoint(self):
+    def save_checkpoint(self, epoch):
         ckpt = {
-            "current_epoch": self.current_epoch,
-            "train_metrics": self.train_metrics,
-            "eval_metrics": self.eval_metrics,
-            "eval_epochs": self.eval_epochs,
-            "model": self.model.state_dict(),
+            "epoch": epoch,
+            "model": self.model_module.state_dict(),
             "optimizer": self.optimizer.state_dict(),
         }
-        if self.current_epoch % self.update_ckpt_every == 0:
+        if (epoch + 1) % self.update_ckpt_every == 0:
             torch.save(ckpt, os.path.join(self.ckpt_path, "latest.ckpt"))
-        if self.current_epoch % self.save_ckpt_every == 0:
+        if (epoch + 1) % self.save_ckpt_every == 0:
             torch.save(
                 ckpt,
-                os.path.join(self.ckpt_path, f"epoch{self.current_epoch:03d}.ckpt"),
+                os.path.join(self.ckpt_path, f"epoch{epoch:04d}.ckpt"),
             )
 
     def load_checkpoint(self):
-        ckpt = torch.load(os.path.join(self.ckpt_path, "latest.ckpt"))
-        self.current_epoch = ckpt["current_epoch"]
-        self.train_metrics = ckpt["train_metrics"]
-        self.eval_metrics = ckpt["eval_metrics"]
-        self.eval_epochs = ckpt["eval_epochs"]
-        self.model.load_state_dict(ckpt["model"])
+        ckpt = torch.load(os.path.join(self.ckpt_path, "latest.ckpt"), map_location='cpu')
+        self.start_epoch = ckpt["epoch"] + 1
+        self.model_module.load_state_dict(ckpt["model"])
         self.optimizer.load_state_dict(ckpt["optimizer"])
 
     def run(self, epochs, resume=False):
         if resume:
             self.load_checkpoint()
 
-        for epoch in range(self.current_epoch, epochs):
-            print(f"Epoch {epoch}")
+        for epoch in range(self.start_epoch, epochs):
+            if self.ddp:
+                self.train_loader.sampler.set_epoch(epoch)
 
-            # Train
             train_dict = self.train_fn()
-            self.log_train_metrics(train_dict)
+            if self.ddp:
+                train_dict = ddp.reduce_dict(train_dict)
 
-            # Eval
             if (epoch + 1) % self.eval_every == 0:
                 eval_dict = self.eval_fn()
-                self.log_eval_metrics(eval_dict)
-                self.eval_epochs.append(epoch)
+                if self.ddp:
+                    eval_dict = ddp.reduce_dict(eval_dict)
             else:
                 eval_dict = None
 
-            # Log
-            self.log_fn(epoch, train_dict, eval_dict)
-
-            # Checkpoint
-            self.current_epoch += 1
-            self.save_checkpoint()
+            if ddp.is_main_process():
+                # Simple logging for ddp
+                print(f"Epoch {epoch}")
+                print(train_dict)
+                if eval_dict:
+                    print(eval_dict)
+                # self.log_fn(epoch, train_dict, eval_dict)
+                self.save_checkpoint(epoch)
