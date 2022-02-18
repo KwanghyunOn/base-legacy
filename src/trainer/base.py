@@ -83,7 +83,7 @@ class BaseTrainer(metaclass=ABCMeta):
         if (epoch + 1) % self.save_ckpt_every == 0:
             torch.save(
                 ckpt,
-                os.path.join(self.ckpt_path, f"epoch{epoch:04d}.ckpt"),
+                os.path.join(self.ckpt_path, f"epoch{(epoch + 1):04d}.ckpt"),
             )
 
     def load_checkpoint(self):
