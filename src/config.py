@@ -14,23 +14,23 @@ class Config:
         self._set_dirs()
 
     def _parse_config(self):
-        self.model_name = self._get_value("model", "name")
-        self.model_kwargs = self._get_value("model", "kwargs")
+        self.model_name = self._get_value("model", "name", required=True)
+        self.model_kwargs = self._get_value("model", "kwargs", default=dict())
 
         self.transform_name = self._get_value("data", "transform", "name")
-        self.transform_kwargs = self._get_value("data", "transform", "kwargs")
+        self.transform_kwargs = self._get_value("data", "transform", "kwargs", default=dict())
 
-        self.dataset_name = self._get_value("data", "dataset", "name")
-        self.dataset_kwargs = self._get_value("data", "dataset", "kwargs")
-        self.loader_kwargs = self._get_value("data", "loader", "kwargs")
+        self.dataset_name = self._get_value("data", "dataset", "name", required=True)
+        self.dataset_kwargs = self._get_value("data", "dataset", "kwargs", default=dict())
+        self.loader_kwargs = self._get_value("data", "loader", "kwargs", default=dict())
 
-        self.optim_name = self._get_value("optim", "name")
-        self.optim_kwargs = self._get_value("optim", "kwargs")
+        self.optim_name = self._get_value("optim", "name", required=True)
+        self.optim_kwargs = self._get_value("optim", "kwargs", default=dict())
 
-        self.trainer_name = self._get_value("trainer", "name")
-        self.trainer_kwargs = self._get_value("trainer", "kwargs")
+        self.trainer_name = self._get_value("trainer", "name", required=True)
+        self.trainer_kwargs = self._get_value("trainer", "kwargs", default=dict())
 
-        self.epochs = self._get_value("train", "epochs")
+        self.epochs = self._get_value("train", "epochs", required=True)
 
     def _set_dirs(self):
         self.exp_path = os.path.join(
@@ -49,11 +49,13 @@ class Config:
         self.trainer_kwargs["exp_path"] = self.exp_path
         shutil.copyfile(self.cfg_path, os.path.join(self.exp_path, "config.yaml"))
 
-    def _get_value(self, *keys):
+    def _get_value(self, *keys, default=None, required=False):
         d = self.cfg
         for k in list(keys):
             if k not in d:
-                return None
+                if required:
+                    raise Exception("Required keys not found in config: ", *keys)
+                return default
             else:
                 d = d[k]
         return d
