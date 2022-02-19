@@ -12,9 +12,11 @@ args_launch = [
     "python",
     "-m",
     "torch.distributed.launch",
+    "--use_env",
     "--nproc_per_node",
     str(args.world_size),
     "train.py",
+    "--distributed",
     *unknown,
 ]
 

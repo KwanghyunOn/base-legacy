@@ -1,6 +1,6 @@
 import os
 import torch
-from torch import distributed
+import torch.distributed as dist
 
 
 def reduce_dict(input_dict, average=True):
@@ -12,7 +12,7 @@ def reduce_dict(input_dict, average=True):
     have the averaged results. Returns a dict with the same fields as
     input_dict, after reduction.
     """
-    world_size = distributed.get_world_size()
+    world_size = dist.get_world_size()
     if world_size < 2:
         return input_dict
     with torch.no_grad():
@@ -23,7 +23,7 @@ def reduce_dict(input_dict, average=True):
             names.append(k)
             values.append(v)
         values = torch.stack(values, dim=0)
-        distributed.all_reduce(values)
+        dist.all_reduce(values)
         if average:
             values /= world_size
         reduced_dict = {k: v for k, v in zip(names, values)}
@@ -31,9 +31,9 @@ def reduce_dict(input_dict, average=True):
 
 
 def is_dist_avail_and_initialized():
-    if not distributed.is_available():
+    if not dist.is_available():
         return False
-    if not distributed.is_initialized():
+    if not dist.is_initialized():
         return False
     return True
 
@@ -41,13 +41,13 @@ def is_dist_avail_and_initialized():
 def get_world_size():
     if not is_dist_avail_and_initialized():
         return 1
-    return distributed.get_world_size()
+    return dist.get_world_size()
 
 
 def get_rank():
     if not is_dist_avail_and_initialized():
         return 0
-    return distributed.get_rank()
+    return dist.get_rank()
 
 
 def get_local_size():

@@ -14,13 +14,13 @@ def main():
     parser.add_argument("--config", type=str, required=True)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--reset", action="store_true")
-    parser.add_argument("--local_rank", type=int)
+    parser.add_argument("--distributed", action="store_true")
     args = parser.parse_args()
     cfg = Config(args.config, args.resume, args.reset)
-    if args.local_rank is None:
-        train(cfg)
+    if args.distributed:
+        train_ddp(cfg)
     else:
-        train_ddp(cfg, local_rank=args.local_rank)
+        train(cfg)
 
 
 def train(cfg):
@@ -44,9 +44,10 @@ def train(cfg):
     trainer.run(cfg.epochs, cfg.resume)
 
 
-def train_ddp(cfg, local_rank):
+def train_ddp(cfg):
+    local_rank = int(os.environ["LOCAL_RANK"])
     torch.cuda.set_device(local_rank)
-    torch.distributed.init_process_group(backend="nccl", init_method="env://")
+    torch.distributed.init_process_group(backend="nccl")
 
     model = get_model(cfg.model_name, cfg.model_kwargs).cuda()
     model = torch.nn.parallel.DistributedDataParallel(
