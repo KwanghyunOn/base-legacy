@@ -17,6 +17,8 @@ args_launch = [
     "train.py",
     *unknown,
 ]
+
+print(f"Launching distributed trianing on {args.world_size} gpus.")
 p = subprocess.Popen(args_launch, stdout=sys.stdout, stderr=sys.stderr)
 
 try:
