@@ -71,7 +71,7 @@ def train_ddp(cfg):
         optimizer,
         loader_train,
         loader_eval,
-        ddp=True,
+        use_ddp=True,
     )
     trainer.run(cfg.epochs, cfg.resume)
 

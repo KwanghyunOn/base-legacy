@@ -18,7 +18,7 @@ class BaseTrainer(metaclass=ABCMeta):
         eval_every,
         update_ckpt_every,
         save_ckpt_every,
-        ddp=False,
+        use_ddp=False,
     ):
 
         self.model = model
@@ -37,10 +37,10 @@ class BaseTrainer(metaclass=ABCMeta):
 
         self.device = torch.device("cuda")
         self.model.to(self.device)
-        self.ddp = ddp
+        self.use_ddp = use_ddp
 
         # For saving and loading state_dict
-        if self.ddp:
+        if self.use_ddp:
             self.model_module = self.model.module
         else:
             self.model_module = self.model
@@ -99,16 +99,16 @@ class BaseTrainer(metaclass=ABCMeta):
             self.load_checkpoint()
 
         for epoch in range(self.start_epoch, epochs):
-            if self.ddp:
+            if self.use_ddp:
                 self.train_loader.sampler.set_epoch(epoch)
 
             train_dict = self.train_fn()
-            if self.ddp:
+            if self.use_ddp:
                 train_dict = ddp.reduce_dict(train_dict)
 
             if (epoch + 1) % self.eval_every == 0:
                 eval_dict = self.eval_fn()
-                if self.ddp:
+                if self.use_ddp:
                     eval_dict = ddp.reduce_dict(eval_dict)
             else:
                 eval_dict = None
