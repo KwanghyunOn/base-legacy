@@ -1,0 +1,55 @@
+exp:
+  name: edsr
+  ablation: x4/amp
+  root: ../experiments/sr
+
+common:
+  scale: &scale 4
+
+model:
+  name: sr.EDSR
+  kwargs:
+    scale: *scale
+    depth: 16
+    n_colors: 3
+    n_feats: 64
+
+data:
+  transform:
+    name: sr.SRTransform
+    kwargs:
+      train_size: 64
+      eval_size: 192
+
+  dataset:
+    name: div2k.DIV2K
+    kwargs:
+      root: ../data/div2k
+      scale: *scale
+  loader:
+    kwargs:
+      batch_size: 64
+      num_workers: 4
+      eval_kwargs:
+        batch_size: 4
+
+
+optim:
+  name: Adam
+  kwargs:
+    lr: 1.e-4
+    betas: [0.9, 0.99]
+
+trainer:
+  name: sr.SRTrainer
+  kwargs:
+    eval_every: 10
+    update_ckpt_every: 10
+    save_ckpt_every: 100
+  
+logger:
+  kwargs:
+    use_wandb: True
+
+train:
+  epochs: 2000

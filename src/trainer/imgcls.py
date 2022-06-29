@@ -5,6 +5,7 @@ from .base import BaseTrainer
 
 
 class ImageClsTrainer(BaseTrainer):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.loss = nn.CrossEntropyLoss()

@@ -36,7 +36,7 @@ class DIV2K(ImageDataset):
         deg = "bicubic"
         hr_data_dir = os.path.join(root, f"DIV2K_{split}_HR")
         lr_data_dir = os.path.join(root, f"DIV2K_{split}_LR_{deg}", f"X{scale}")
-        data_dirs = {"hr": hr_data_dir, "lr": lr_data_dir}
+        data_dirs = {"img_hr": hr_data_dir, "img_lr": lr_data_dir}
         super().__init__(data_dirs, transform, is_binary, train)
 
     def __len__(self):

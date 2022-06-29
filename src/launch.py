@@ -7,6 +7,9 @@ from packaging.version import parse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--world_size", type=int, default=torch.cuda.device_count())
+parser.add_argument("--script", type=str, default="train.py")
+parser.add_argument("--log_dir", type=str, default="./temp/log/")
+parser.add_argument("--redirect", action="store_true")
 args, unknown = parser.parse_known_args()
 
 if parse(torch.__version__) >= parse("1.10"):
@@ -15,20 +18,24 @@ if parse(torch.__version__) >= parse("1.10"):
     streams from rank 0 will be printed to the console. Set --log_dir in args_launch to set
     directory for log files.
     """
-    redirects = ""
-    for rank in range(1, args.world_size):
-        redirects += f"{rank}:3"
-    if redirects.endswith(","):
-        redirects = redirects[:-1]
+    if args.redirect:
+        redirects = ",".join(f"{rank}:3" for rank in range(1, args.world_size))
+    else:
+        redirects = "0"
 
     args_launch = [
         "torchrun",
-        "--standalone",
+        "--rdzv_backend",
+        "c10d",
+        "--rdzv_endpoint",
+        "localhost:0",
         "--nproc_per_node",
         str(args.world_size),
+        "--log_dir",
+        args.log_dir,
         "--redirects",
         redirects,
-        "train.py",
+        args.script,
         "--distributed",
         *unknown,
     ]

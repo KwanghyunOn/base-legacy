@@ -62,10 +62,23 @@ def get_local_rank():
     return int(os.environ["LOCAL_RANK"])
 
 
-def is_main_process():
+def is_master_process():
     return get_rank() == 0
 
 
 def save_on_master(*args, **kwargs):
-    if is_main_process():
+    if is_master_process():
         torch.save(*args, **kwargs)
+
+
+def gather_and_concat(x, dim=0):
+    if not is_dist_avail_and_initialized():
+        return x
+    x_all = [torch.zeros_like(x) for _ in range(get_world_size())]
+    dist.all_gather(x_all, x)
+    return torch.cat(x_all, dim=dim)
+
+
+def wait():
+    if dist.is_initialized():
+        dist.barrier()

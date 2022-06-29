@@ -33,6 +33,7 @@ class Config:
 
         self.trainer_name = self._get_value("trainer", "name", required=True)
         self.trainer_kwargs = self._get_value("trainer", "kwargs", default=dict())
+        self.logger_kwargs = self._get_value("logger", "kwargs", default=dict())
 
         self.epochs = self._get_value("train", "epochs", required=True)
 
@@ -51,6 +52,9 @@ class Config:
             )
         os.makedirs(self.exp_path, exist_ok=True)
         self.trainer_kwargs["exp_path"] = self.exp_path
+        log_dir = os.path.join(self.exp_path, "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        self.logger_kwargs["dir"] = log_dir
         shutil.copyfile(self.cfg_path, os.path.join(self.exp_path, "config.yaml"))
 
     def _get_value(self, *keys, default=None, required=False):
